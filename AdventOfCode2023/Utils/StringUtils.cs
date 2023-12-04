@@ -68,6 +68,12 @@ namespace AdventOfCode2023.Utils
             return intList;
         }
 
+        public static HashSet<int> SpaceSeparatedIntStringToHashSet(string input)
+        {
+            var nums = input.Split(" ");
+            return nums.Where(s => s.Trim().Length > 0).Select(s => s.Trim()).Select(int.Parse).ToHashSet<int>();
+        }
+
         /// <summary>
         /// Convert a hex string into 4-bit binary, using 0=0000, 1=0001, A=1010, etc
         /// </summary>

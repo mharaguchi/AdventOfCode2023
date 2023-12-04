@@ -9,12 +9,14 @@ namespace AdventOfCode2023.Days
 {
     public static class Day4
     {
-        public static string _sampleInput = @"2-4,6-8
-2-3,4-5
-5-7,7-9
-2-8,3-7
-6-6,4-6
-2-6,4-8";
+        public static string _sampleInput = @"Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
+Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19
+Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1
+Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83
+Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36
+Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11";
+
+        public static Dictionary<int, int> cardInstances = new Dictionary<int, int>();
 
         public static string Run(string input, int part, bool useSampleData)
         {
@@ -44,11 +46,20 @@ namespace AdventOfCode2023.Days
 
             foreach(string line in lines)
             {
-                var tokens = StringUtils.SplitInOrder(line, new string[] { "-", ",", "-" });
-                var ints = tokens.Select(int.Parse).ToList();
-                if (ints[0] <= ints[2] && ints[1] >= ints[3] || ints[2] <= ints[0] && ints[3] >= ints[1])
+                var thisCardMatches = -1;
+                var tokens = StringUtils.SplitInOrder(line, new string[] { ": ", " | "});
+                var winningNumbers = StringUtils.SpaceSeparatedIntStringToHashSet(tokens[1]);
+                var myNumbers = tokens[2].Split(" ").Where(s => s.Trim().Length > 0).Select(s => s.Trim()).Select(int.Parse);
+                foreach (var myNum in myNumbers)
                 {
-                    totalScore++;
+                    if (winningNumbers.Contains(myNum))
+                    {
+                        thisCardMatches++;
+                    }
+                }
+                if (thisCardMatches >= 0)
+                {
+                    totalScore += (int)Math.Pow(2, thisCardMatches);
                 }
             }
 
@@ -59,60 +70,38 @@ namespace AdventOfCode2023.Days
         {
             var lines = FileInputUtils.SplitLinesIntoStringArray(input);
 
-            var totalScore = 0;
+            for(int i = 1; i <= lines.Length; i++)
+            {
+                cardInstances.Add(i, 1);
+            }
 
             foreach (string line in lines)
             {
-                var tokens = StringUtils.SplitInOrder(line, new string[] { "-", ",", "-" });
-                var ints = tokens.Select(int.Parse).ToList();
-                if (!(ints[1] < ints[2] || ints[3] < ints[0]))
+                var thisCardMatches = 0;
+                var tokens = StringUtils.SplitInOrder(line, new string[] { " ", ": ", " | " });
+                var cardId = Int32.Parse(tokens[1]);
+                var winningNumbers = StringUtils.SpaceSeparatedIntStringToHashSet(tokens[2]);
+                var myNumbers = tokens[3].Split(" ").Where(s => s.Trim().Length > 0).Select(s => s.Trim()).Select(int.Parse);
+                foreach (var myNum in myNumbers)
                 {
-                    //Console.WriteLine(line);
-                    totalScore++;
+                    if (winningNumbers.Contains(myNum))
+                    {
+                        thisCardMatches++;
+                    }
+                }
+                if (thisCardMatches > 0)
+                {
+                    for (int i = 1; i <= thisCardMatches; i++)
+                    {
+                        cardInstances[cardId + i] += cardInstances[cardId];
+                    }
                 }
             }
 
-            return totalScore.ToString();
+            return cardInstances.Sum(x => x.Value).ToString();
         }
 
         #region Private Methods
-        private static char FindCommonItem(string first, string second)
-        {
-            foreach(char ch in first)
-            {
-                if (second.Contains(ch))
-                {
-                    return ch;
-                }
-            }
-            throw new Exception();
-        }
-
-        private static int GetItemScore(char item)
-        {
-            if (item >= 'a' && item <= 'z')
-            {
-                return item - 'a' + 1;
-            }
-            else
-            {
-                return item - 'A' + 27;
-            }
-        }
-
-        private static HashSet<char> GetItemSet(string items)
-        {
-            var set = new HashSet<char>();
-
-            foreach(char item in items) { 
-                if (!set.Contains(item))
-                {
-                    set.Add(item);
-                }
-            }
-
-            return set;
-        }
         #endregion
     }
 }

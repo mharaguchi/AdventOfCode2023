@@ -2,7 +2,7 @@
 
 using AdventOfCode2023;
 
-const int DAY = 3;
+const int DAY = 4;
 const int PART = 2;
 const bool USE_SAMPLE_DATA = false;
 
